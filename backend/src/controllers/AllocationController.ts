@@ -50,7 +50,7 @@ export class AllocationController {
     }
   }
 
-  public async getAllAllocations(req: Request, res: Response): Promise<void> {
+  public async getAllAllocations(_req: Request, res: Response): Promise<void> {
     try {
       const allocations = await this.allocationService.getAllAllocations();
 

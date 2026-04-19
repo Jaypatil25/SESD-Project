@@ -18,21 +18,21 @@ export class Admin extends User {
     return this.adminId;
   }
 
-  public async addHostel(name: string, location: string): Promise<boolean> {
+  public async addHostel(_name: string, _location: string): Promise<boolean> {
     
     return true;
   }
 
   public async addRoom(
-    roomNumber: string,
-    capacity: number,
-    hostelId: number
+    _roomNumber: string,
+    _capacity: number,
+    _hostelId: number
   ): Promise<boolean> {
     
     return true;
   }
 
-  public async assignRoom(studentId: number, roomId: number): Promise<boolean> {
+  public async assignRoom(_studentId: number, _roomId: number): Promise<boolean> {
     
     return true;
   }

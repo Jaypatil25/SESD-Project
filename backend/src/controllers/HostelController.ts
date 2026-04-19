@@ -48,7 +48,7 @@ export class HostelController {
     }
   }
 
-  public async getAllHostels(req: Request, res: Response): Promise<void> {
+  public async getAllHostels(_req: Request, res: Response): Promise<void> {
     try {
       const hostels = await this.hostelService.getAllHostels();
 

@@ -4,15 +4,38 @@ import { AdminController } from '../controllers/AdminController';
 import { RoomController } from '../controllers/RoomController';
 import { HostelController } from '../controllers/HostelController';
 import { AllocationController } from '../controllers/AllocationController';
+import { AuthController } from '../controllers/AuthController';
+import { authMiddleware } from '../middleware/authMiddleware';
 
 export function configureRoutes(
   studentController: StudentController,
   adminController: AdminController,
   roomController: RoomController,
   hostelController: HostelController,
-  allocationController: AllocationController
+  allocationController: AllocationController,
+  authController: AuthController
 ): Router {
   const router = Router();
+
+  // ==================== AUTHENTICATION ROUTES ====================
+  // Public routes - no auth required
+  router.post('/auth/student/login', (req, res) =>
+    authController.studentLogin(req, res)
+  );
+  router.post('/auth/admin/login', (req, res) =>
+    authController.adminLogin(req, res)
+  );
+  router.post('/auth/student/register', (req, res) =>
+    authController.studentRegister(req, res)
+  );
+  router.post('/auth/admin/register', (req, res) =>
+    authController.adminRegister(req, res)
+  );
+
+  // Protected routes - auth required
+  router.post('/auth/verify', authMiddleware, (req, res) =>
+    authController.verifyToken(req, res)
+  );
 
   router.post('/students/register', (req, res) =>
     studentController.registerStudent(req, res)

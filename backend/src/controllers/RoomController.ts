@@ -56,7 +56,7 @@ export class RoomController {
     }
   }
 
-  public async getAllRooms(req: Request, res: Response): Promise<void> {
+  public async getAllRooms(_req: Request, res: Response): Promise<void> {
     try {
       const rooms = await this.roomService.getAllRooms();
 
@@ -80,7 +80,7 @@ export class RoomController {
     }
   }
 
-  public async getAvailableRooms(req: Request, res: Response): Promise<void> {
+  public async getAvailableRooms(_req: Request, res: Response): Promise<void> {
     try {
       const rooms = await this.roomService.getAvailableRooms();
 

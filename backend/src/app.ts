@@ -1,4 +1,5 @@
 import express, { Express } from 'express';
+import cors from 'cors';
 import { configureRoutes } from './routes';
 
 import { StudentRepository } from './repositories/StudentRepository';
@@ -12,6 +13,7 @@ import { AdminService } from './services/AdminService';
 import { HostelService } from './services/HostelService';
 import { RoomService } from './services/RoomService';
 import { AllocationService } from './services/AllocationService';
+import { AuthService } from './services/AuthService';
 
 import { FirstComeFirstServeStrategy } from './strategies/FirstComeFirstServeStrategy';
 
@@ -20,6 +22,7 @@ import { AdminController } from './controllers/AdminController';
 import { HostelController } from './controllers/HostelController';
 import { RoomController } from './controllers/RoomController';
 import { AllocationController } from './controllers/AllocationController';
+import { AuthController } from './controllers/AuthController';
 
 class DIContainer {
   private studentRepository: StudentRepository;
@@ -33,12 +36,14 @@ class DIContainer {
   private hostelService: HostelService;
   private roomService: RoomService;
   private allocationService: AllocationService;
+  private authService: AuthService;
 
   private studentController: StudentController;
   private adminController: AdminController;
   private hostelController: HostelController;
   private roomController: RoomController;
   private allocationController: AllocationController;
+  private authController: AuthController;
 
   constructor() {
     
@@ -67,11 +72,14 @@ class DIContainer {
       allocationStrategy
     );
 
+    this.authService = new AuthService();
+
     this.studentController = new StudentController(this.studentService);
     this.adminController = new AdminController(this.adminService);
     this.hostelController = new HostelController(this.hostelService);
     this.roomController = new RoomController(this.roomService);
     this.allocationController = new AllocationController(this.allocationService);
+    this.authController = new AuthController(this.authService);
   }
 
   public getControllers() {
@@ -81,12 +89,21 @@ class DIContainer {
       hostelController: this.hostelController,
       roomController: this.roomController,
       allocationController: this.allocationController,
+      authController: this.authController,
     };
   }
 }
 
 export function createApp(): Express {
   const app = express();
+
+  // Enable CORS
+  app.use(cors({
+    origin: ['http://localhost:5178', 'http://localhost:5177', 'http://localhost:5176', 'http://localhost:5175', 'http://localhost:5174', 'http://localhost:5173'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }));
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -101,15 +118,16 @@ export function createApp(): Express {
       controllers.adminController,
       controllers.roomController,
       controllers.hostelController,
-      controllers.allocationController
+      controllers.allocationController,
+      controllers.authController
     )
   );
 
-  app.get('/health', (req, res) => {
+  app.get('/health', (_req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
   });
 
-  app.use((req, res) => {
+  app.use((_req, res) => {
     res.status(404).json({
       success: false,
       error: 'NOT_FOUND',
@@ -117,7 +135,7 @@ export function createApp(): Express {
     });
   });
 
-  app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error('Error:', err.message);
     res.status(500).json({
       success: false,

@@ -1,5 +1,5 @@
 import { Allocation } from '../models/Allocation';
-import { Room } from '../models/Room';
+
 import { AllocationRepository } from '../repositories/AllocationRepository';
 import { StudentService } from './StudentService';
 import { RoomService } from './RoomService';
@@ -37,7 +37,7 @@ export class AllocationService {
       throw new ValidationError('No available rooms for allocation', 'studentId');
     }
 
-    const allocatedRoom = await this.roomService.allocateRoom(room.getRoomId());
+    await this.roomService.allocateRoom(room.getRoomId());
 
     await this.studentService.getStudentById(studentId);
     student.setRoomId(room.getRoomId());
@@ -91,7 +91,7 @@ export class AllocationService {
     const student = await this.studentService.getStudentById(
       allocation.getStudentId()
     );
-    student.setRoomId(undefined);
+    student.setRoomId(0);
 
     await this.allocationRepository.delete(allocationId);
 

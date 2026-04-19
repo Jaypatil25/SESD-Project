@@ -1,0 +1,196 @@
+// Prisma Schema for Hostel Room Allocation System
+// Learn more about it: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma-client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MODELS
+// ============================================
+
+// Base User Model - Abstract in code, concrete in DB
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+  role     String @default("STUDENT") // STUDENT or ADMIN
+
+  // Relations
+  student Student?
+  admin   Admin?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@map("users")
+}
+
+// UserRole is now stored as String in User model
+
+// Student Model
+model Student {
+  id          Int     @id @default(autoincrement())
+  studentId   String  @unique // Unique student identifier (e.g., "S001", "20CS001")
+  department  String
+  year        Int // Academic year (1-4)
+  phoneNumber String?
+  address     String?
+
+  // Foreign Keys
+  userId Int   @unique
+  user   User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roomId Int? // Current room if allocated
+  room   Room? @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
+  // Relations
+  allocations Allocation[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([userId])
+  @@index([roomId])
+  @@map("students")
+}
+
+// Admin Model
+model Admin {
+  id      Int    @id @default(autoincrement())
+  adminId String @unique // Unique admin identifier
+
+  // Foreign Keys
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([adminId])
+  @@index([userId])
+  @@map("admins")
+}
+
+// ============================================
+// HOSTEL & ROOM MODELS
+// ============================================
+
+// Hostel Model
+model Hostel {
+  id          Int     @id @default(autoincrement())
+  name        String // e.g., "YourSpace - 1", "Incampus - Boys"
+  location    String
+  type        String  @default("COED") // BOYS, GIRLS, COED
+  description String?
+
+  // Relations
+  rooms Room[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, location])
+  @@index([type])
+  @@map("hostels")
+}
+
+// HostelType is now stored as String in Hostel model
+
+// Room Model
+model Room {
+  id           Int     @id @default(autoincrement())
+  roomNumber   Int // Room number (1-120 depending on hostel)
+  capacity     Int // Sharing capacity (3 or 4)
+  currentCount Int     @default(0) // Current occupants
+  isAvailable  Boolean @default(true)
+  amenities    String? // Store as JSON string (e.g., '["AC","WiFi"]')
+
+  // Foreign Keys
+  hostelId Int
+  hostel   Hostel @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  // Relations
+  students    Student[]
+  allocations Allocation[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([hostelId, roomNumber])
+  @@index([hostelId])
+  @@index([isAvailable])
+  @@map("rooms")
+}
+
+// ============================================
+// ALLOCATION MODEL
+// ============================================
+
+// Room Allocation Model
+model Allocation {
+  id     Int    @id @default(autoincrement())
+  status String @default("PENDING") // PENDING, APPROVED, REJECTED, ALLOCATED, DEALLOCATED
+
+  // Foreign Keys
+  studentId Int
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  roomId Int
+  room   Room @relation(fields: [roomId], references: [id], onDelete: Restrict)
+
+  // Allocation Details
+  allocationDate DateTime  @default(now())
+  approvalDate   DateTime?
+  notes          String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, roomId])
+  @@index([studentId])
+  @@index([roomId])
+  @@index([status])
+  @@map("allocations")
+}
+
+// AllocationStatus is now stored as String in Allocation model
+
+// ============================================
+// AUDIT & LOGGING MODELS
+// ============================================
+
+// Activity Log - Optional for audit trail
+model ActivityLog {
+  id         Int     @id @default(autoincrement())
+  action     String // e.g., "ROOM_ALLOCATED", "STUDENT_CREATED"
+  entityType String // e.g., "Student", "Room"
+  entityId   Int
+  details    String? // JSON details of the action
+
+  // User who performed the action
+  userId Int?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([entityType])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}

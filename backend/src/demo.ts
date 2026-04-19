@@ -1,12 +1,12 @@
 
 import { StudentRepository } from './repositories/StudentRepository';
-import { AdminRepository } from './repositories/AdminRepository';
+
 import { HostelRepository } from './repositories/HostelRepository';
 import { RoomRepository } from './repositories/RoomRepository';
 import { AllocationRepository } from './repositories/AllocationRepository';
 
 import { StudentService } from './services/StudentService';
-import { AdminService } from './services/AdminService';
+
 import { HostelService } from './services/HostelService';
 import { RoomService } from './services/RoomService';
 import { AllocationService } from './services/AllocationService';
@@ -21,14 +21,14 @@ export async function demoAllocationSystem(): Promise<void> {
 
     console.log('📦 Initializing repositories...');
     const studentRepository = new StudentRepository();
-    const adminRepository = new AdminRepository();
+    
     const hostelRepository = new HostelRepository();
     const roomRepository = new RoomRepository();
     const allocationRepository = new AllocationRepository();
 
     console.log('🔧 Initializing services...');
     const studentService = new StudentService(studentRepository);
-    const adminService = new AdminService(adminRepository);
+    
     const hostelService = new HostelService(hostelRepository);
     const roomService = new RoomService(roomRepository, hostelService);
     const allocationStrategy = new FirstComeFirstServeStrategy(roomRepository);

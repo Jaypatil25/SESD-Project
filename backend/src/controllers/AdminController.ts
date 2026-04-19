@@ -50,7 +50,7 @@ export class AdminController {
     }
   }
 
-  public async getAllAdmins(req: Request, res: Response): Promise<void> {
+  public async getAllAdmins(_req: Request, res: Response): Promise<void> {
     try {
       const admins = await this.adminService.getAllAdmins();
 

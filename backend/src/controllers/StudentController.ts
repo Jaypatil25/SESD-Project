@@ -62,7 +62,7 @@ export class StudentController {
     }
   }
 
-  public async getAllStudents(req: Request, res: Response): Promise<void> {
+  public async getAllStudents(_req: Request, res: Response): Promise<void> {
     try {
       const students = await this.studentService.getAllStudents();
 

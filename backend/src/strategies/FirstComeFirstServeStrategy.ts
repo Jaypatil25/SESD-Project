@@ -5,7 +5,7 @@ import { RoomRepository } from '../repositories/RoomRepository';
 export class FirstComeFirstServeStrategy implements IAllocationStrategy {
   constructor(private roomRepository: RoomRepository) {}
 
-  public async allocate(studentId: number): Promise<Room | null> {
+  public async allocate(_studentId: number): Promise<Room | null> {
     
     const availableRooms = await this.roomRepository.findAvailable();
 
